@@ -11,23 +11,23 @@ jobs:
       run:
         working-directory: ${{ github.workspace }}/target
     env:
-      FusionLiteServerHost: ${{vars.FUSIONLITE_SERVER_HOST}}
-      FusionLiteServerPort: ${{vars.FUSIONLITE_SERVER_PORT}}
-      FusionLiteServerUser: ${{secrets.FUSIONLITE_SERVER_USER}}
-      FusionLiteServerKeyFile: ${{secrets.FUSIONLITE_SERVER_KEY_FILE}}
-      FusionLiteProject: easybuggy
-      ApplicationFile: easybuggy.jar
+      FusionLiteServerHost: ${{ vars.FUSIONLITE_SERVER_HOST }}
+      FusionLiteServerPort: ${{ vars.FUSIONLITE_SERVER_PORT }}
+      FusionLiteServerUser: ${{ secrets.FUSIONLITE_SERVER_USER }}
+      FusionLiteServerKeyFile: ${{ secrets.FUSIONLITE_SERVER_KEY_FILE }}
+      FusionLiteProject: ${{ github.event.repository.name }}
+      ApplicationFile: ${{ github.event.repository.name }}.jar
       ApplicationInclude: ""
       ApplicationExclude: ""
       InstrumentedFolder: Instrumented
-      InstrumentedFile: easybuggy.jar
+      InstrumentedFile: ${{ github.event.repository.name }}.jar
 
     steps:
     - name: Print environment variables
       run: |
-        echo "FusionLiteServerHost: ${{ vars.FUSIONLITE_SERVER_HOST }}"
-        echo "FusionLiteServerPort: ${{env.FusionLiteServerPort}}"
-        echo "FusionLiteServerUser: ${{env.FusionLiteServerUser}}"
+        echo "FusionLiteServerHost: ${{ env.FusionLiteServerHost }}"
+        echo "FusionLiteServerPort: ${{ env.FusionLiteServerPort }}"
+        echo "FusionLiteServerUser: ${{ env.FusionLiteServerUser }}"
         echo "FusionLiteServerKeyFile: ${{ env.FusionLiteServerKeyFile }}"
         echo "FusionLiteProject: ${{ env.FusionLiteProject }}"
         echo "ApplicationFile: ${{ env.ApplicationFile }}"
