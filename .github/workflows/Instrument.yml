@@ -9,7 +9,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ${{ github.workspace }}/target
+        working-directory: ${{ github.workspace }}
     env:
       FusionLiteServerHost: ${{ vars.FUSIONLITE_SERVER_HOST }}
       FusionLiteServerPort: ${{ vars.FUSIONLITE_SERVER_PORT }}
