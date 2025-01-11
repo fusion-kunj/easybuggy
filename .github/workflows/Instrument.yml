@@ -17,35 +17,40 @@ jobs:
       FusionLiteServerKeyFile: ${{ secrets.FUSIONLITE_SERVER_KEY_FILE }}
       FusionLiteProject: easybuggy
       ApplicationFile: easybuggy.jar
+      ApplicationInclude: ""
+      ApplicationExclude: ""
       InstrumentedFolder: Instrumented
       InstrumentedFile: easybuggy.jar
 
     steps:
-    - name: Verify Environment Variables
+    - name: Print environment variables
       run: |
         echo "FusionLiteServerHost: ${{ env.FusionLiteServerHost }}"
         echo "FusionLiteServerPort: ${{ env.FusionLiteServerPort }}"
         echo "FusionLiteServerUser: ${{ env.FusionLiteServerUser }}"
         echo "FusionLiteServerKeyFile: ${{ env.FusionLiteServerKeyFile }}"
         echo "FusionLiteProject: ${{ env.FusionLiteProject }}"
+        echo "ApplicationFile: ${{ env.ApplicationFile }}"
+        echo "ApplicationInclude: ${{ env.ApplicationInclude }}"
+        echo "ApplicationExclude: ${{ env.ApplicationExclude }}"
+        echo "InstrumentedFolder: ${{ env.InstrumentedFolder }}"
+        echo "InstrumentedFile: ${{ env.InstrumentedFile }}"
+      
+    - name: Print current working directory
+      run: pwd
       
     - name: Clean Project
-      shell: pwsh
       run: |
-        $cmdtext = "Clean:$env:FusionLiteProject"
-        Write-Host "Cmd: $cmdtext"
-        ssh -i $env:FusionLiteServerKeyFile -p $env:FusionLiteServerPort "$env:FusionLiteServerUser@$env:FusionLiteServerHost" $cmdtext
+          $cmdtext = "Clean" + ":" + $env:FusionLiteProject
+          echo "Cmd : $cmdtext"
+          ssh -i $env:FusionLiteServerKeyFile -p $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost $cmdtext
+          echo "Clean Project Done"
 
-    - name: Transmit Project Files
-      shell: pwsh
+    - name: Transmitting Project Files
       run: |
-        @"
-        cd $env:FusionLiteProject/Input
-        put $env:ApplicationFile
-        exit
-        "@ | Out-File -FilePath "sftp_put.txt" -Encoding ASCII
+          echo "cd $env:FusionLiteProject/Input`nput $env:ApplicationFile`nexit" | Out-File -FilePath "sftp_put.txt" -Encoding ASCII
 
-        sftp -vvv -b sftp_put.txt -i $env:FusionLiteServerKeyFile -P $env:FusionLiteServerPort "$env:FusionLiteServerUser@$env:FusionLiteServerHost"
+          sftp -b sftp_put.txt -i $env:FusionLiteServerKeyFile -P $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost
           
     - name: Preprocessing Project
       run: |
