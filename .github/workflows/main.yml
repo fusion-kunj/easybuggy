@@ -1,13 +1,8 @@
 name: EasyBuggy Build and Test
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
+  workflow_dispatch:
+  
 jobs:
   build:
     runs-on: self-hosted
