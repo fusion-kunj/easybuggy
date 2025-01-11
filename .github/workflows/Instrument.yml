@@ -15,12 +15,12 @@ jobs:
       FusionLiteServerPort: ${{ vars.FUSIONLITE_SERVER_PORT }}
       FusionLiteServerUser: ${{ secrets.FUSIONLITE_SERVER_USER }}
       FusionLiteServerKeyFile: ${{ secrets.FUSIONLITE_SERVER_KEY_FILE }}
-      FusionLiteProject: ${{ github.event.repository.name }}
-      ApplicationFile: ${{ github.event.repository.name }}.jar
+      FusionLiteProject: easybuggy
+      ApplicationFile: easybuggy.jar
       ApplicationInclude: ""
       ApplicationExclude: ""
       InstrumentedFolder: Instrumented
-      InstrumentedFile: ${{ github.event.repository.name }}.jar
+      InstrumentedFile: easybuggy.jar
 
     steps:
     - name: Print environment variables
