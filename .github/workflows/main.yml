@@ -1,7 +1,13 @@
 name: EasyBuggy Build and Test
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: self-hosted
@@ -29,4 +35,19 @@ jobs:
 
     # Build the project with Maven
     - name: Build with Maven
-      run: mvn clean install
+      run: mvn clean compile
+
+    # Run tests
+    - name: Run tests
+      run: mvn test
+
+    # Package the application
+    - name: Package application
+      run: mvn package
+
+    # Archive build artifacts
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: easybuggy-artifacts
+        path: target/*.jar
