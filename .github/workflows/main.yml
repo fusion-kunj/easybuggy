@@ -1,11 +1,16 @@
-name: EasyBuggy Build and Test
+name: EasyBuggy Build and Test (Windows)
 
 on:
- workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: windows-latest
 
     steps:
     # Checkout the code
@@ -18,6 +23,19 @@ jobs:
       with:
         java-version: 11
         distribution: 'temurin'
+
+    # Check and install Maven if not available
+    - name: Check Maven installation
+      id: check-maven
+      run: |
+        if (-not (Get-Command mvn -ErrorAction SilentlyContinue)) {
+          Write-Host "Maven not installed, installing..."
+          Invoke-WebRequest -Uri https://downloads.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.zip -OutFile maven.zip
+          Expand-Archive -Path maven.zip -DestinationPath $Env:ProgramFiles
+          $env:Path += ";$Env:ProgramFiles\apache-maven-3.9.5\bin"
+        } else {
+          Write-Host "Maven is already installed"
+        }
 
     # Cache Maven dependencies
     - name: Cache Maven dependencies
