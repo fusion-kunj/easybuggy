@@ -25,10 +25,10 @@ jobs:
     steps:
     - name: Print environment variables
       run: |
-        echo "FusionLiteServerHost: ${{ env.FusionLiteServerHost }}"
-        echo "FusionLiteServerPort: ${{ env.FusionLiteServerPort }}"
-        echo "FusionLiteServerUser: ${{ env.FusionLiteServerUser }}"
-        echo "FusionLiteServerKeyFile: ${{ env.FusionLiteServerKeyFile }}"
+        echo "FusionLiteServerHost: ${{ env.FUSIONLITE_SERVER_HOST }}"
+        echo "FusionLiteServerPort: ${{ env.FUSIONLITE_SERVER_PORT }}"
+        echo "FusionLiteServerUser: ${{ env.FUSIONLITE_SERVER_USER }}"
+        echo "FusionLiteServerKeyFile: ${{ env.FUSIONLITE_SERVER_KEY_FILE }}"
         echo "FusionLiteProject: ${{ env.FusionLiteProject }}"
         echo "ApplicationFile: ${{ env.ApplicationFile }}"
         echo "ApplicationInclude: ${{ env.ApplicationInclude }}"
@@ -43,7 +43,7 @@ jobs:
       run: |
           $cmdtext = "Clean" + ":" + $env:FusionLiteProject
           echo "Cmd : $cmdtext"
-          ssh -i $env:FusionLiteServerKeyFile -p 22 Admin@localhost $cmdtext
+          ssh -i $env:FUSIONLITE_SERVER_KEY_FILE -p $env:FUSIONLITE_SERVER_PORT $env:FUSIONLITE_SERVER_USER@$env:FUSIONLITE_SERVER_HOST $cmdtext
           echo "Clean Project Done"
 
     - name: Transmitting Project Files
