@@ -11,10 +11,10 @@ jobs:
       run:
         working-directory: ${{ github.workspace }}
     env:
-      FusionLiteServerHost: ${{ vars.FUSIONLITE_SERVER_HOST }}
-      FusionLiteServerPort: ${{ vars.FUSIONLITE_SERVER_PORT }}
-      FusionLiteServerUser: ${{ secrets.FUSIONLITE_SERVER_USER }}
-      FusionLiteServerKeyFile: ${{ secrets.FUSIONLITE_SERVER_KEY_FILE }}
+      FusionLiteServerHost: localhost
+      FusionLiteServerPort: 22
+      FusionLiteServerUser: Admin
+      FusionLiteServerKeyFile: C:/FusionLiteInsight/FusionLiteProjectService/id_ecdsa
       FusionLiteProject: ${{ github.event.repository.name }}
       ApplicationFile: ${{ github.event.repository.name }}.jar
       ApplicationInclude: ""
