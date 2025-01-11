@@ -1,4 +1,4 @@
-name: EasyBuggy Build and Test (Windows)
+name: EasyBuggy Build and Test
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     # Checkout the code
@@ -28,14 +28,13 @@ jobs:
     - name: Check Maven installation
       id: check-maven
       run: |
-        if (-not (Get-Command mvn -ErrorAction SilentlyContinue)) {
-          Write-Host "Maven not installed, installing..."
-          Invoke-WebRequest -Uri https://downloads.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.zip -OutFile maven.zip
-          Expand-Archive -Path maven.zip -DestinationPath $Env:ProgramFiles
-          $env:Path += ";$Env:ProgramFiles\apache-maven-3.9.5\bin"
-        } else {
-          Write-Host "Maven is already installed"
-        }
+        if ! mvn -version; then
+          echo "Maven not installed, installing..."
+          sudo apt-get update
+          sudo apt-get install -y maven
+        else
+          echo "Maven is already installed"
+        fi
 
     # Cache Maven dependencies
     - name: Cache Maven dependencies
@@ -49,3 +48,4 @@ jobs:
     # Build the project with Maven
     - name: Build with Maven
       run: mvn clean install
+
