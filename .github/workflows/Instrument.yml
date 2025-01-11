@@ -16,11 +16,11 @@ jobs:
       FusionLiteServerUser: ${{ secrets.FUSIONLITE_SERVER_USER }}
       FusionLiteServerKeyFile: ${{ secrets.FUSIONLITE_SERVER_KEY_FILE }}
       FusionLiteProject: ${{ github.event.repository.name }}
-      ApplicationFile: webgoat-2024.2-SNAPSHOT.jar
+      ApplicationFile: ${{ github.event.repository.name }}.jar
       ApplicationInclude: ""
       ApplicationExclude: ""
       InstrumentedFolder: Instrumented
-      InstrumentedFile: webgoat-2024.2-SNAPSHOT.jar
+      InstrumentedFile: ${{ github.event.repository.name }}.jar
 
     steps:
     - name: Print environment variables
