@@ -9,12 +9,12 @@ jobs:
 
     defaults:
       run:
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/target
     env:
-      FusionLiteServerHost: localhost
-      FusionLiteServerPort: 22
-      FusionLiteServerUser: Admin
-      FusionLiteServerKeyFile: C:/FusionLiteInsight/FusionLiteProjectService/id_ecdsa
+      FusionLiteServerHost: ${{ vars.FUSIONLITE_SERVER_HOST }}
+      FusionLiteServerPort: ${{ vars.FUSIONLITE_SERVER_PORT }}
+      FusionLiteServerUser: ${{ secrets.FUSIONLITE_SERVER_USER }}
+      FusionLiteServerKeyFile: ${{ secrets.FUSIONLITE_SERVER_KEY_FILE }}
       FusionLiteProject: ${{ github.event.repository.name }}
       ApplicationFile: ${{ github.event.repository.name }}.jar
       ApplicationInclude: ""
