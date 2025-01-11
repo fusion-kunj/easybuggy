@@ -24,18 +24,6 @@ jobs:
         java-version: 11
         distribution: 'temurin'
 
-    # Check and install Maven if not available
-    - name: Check Maven installation
-      id: check-maven
-      run: |
-        if ! mvn -version; then
-          echo "Maven not installed, installing..."
-          sudo apt-get update
-          sudo apt-get install -y maven
-        else
-          echo "Maven is already installed"
-        fi
-
     # Cache Maven dependencies
     - name: Cache Maven dependencies
       uses: actions/cache@v3
@@ -48,4 +36,3 @@ jobs:
     # Build the project with Maven
     - name: Build with Maven
       run: mvn clean install
-
