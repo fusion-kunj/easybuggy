@@ -26,8 +26,8 @@ jobs:
     - name: Print environment variables
       run: |
         echo "FusionLiteServerHost: ${{ vars.FUSIONLITE_SERVER_HOST }}"
-        echo "FusionLiteServerPort: ${{ env.FusionLiteServerPort }}"
-        echo "FusionLiteServerUser: ${{ env.FusionLiteServerUser }}"
+        echo "FusionLiteServerPort: ${{env.FusionLiteServerPort}}"
+        echo "FusionLiteServerUser: ${{env.FusionLiteServerUser}}"
         echo "FusionLiteServerKeyFile: ${{ env.FusionLiteServerKeyFile }}"
         echo "FusionLiteProject: ${{ env.FusionLiteProject }}"
         echo "ApplicationFile: ${{ env.ApplicationFile }}"
