@@ -39,16 +39,25 @@ jobs:
     - name: Print current working directory
       run: Get-Location
 
-    - name: Create SSH key file (Pure PowerShell)
+    - name: Create and Secure SSH Key File
       run: |
-        # Write key content
+        # Write key content to file
         Set-Content -Path "id_ecdsa" -Value $env:FusionLiteServerKeyFile
 
-        # Convert CRLF → LF manually to avoid SSH "invalid format"
+        # Convert CRLF -> LF for OpenSSH
         $content = Get-Content "id_ecdsa" -Raw
         $content = $content -replace "`r`n", "`n"
         $content = $content -replace "`r", "`n"
         Set-Content -Path "id_ecdsa" -Value $content -NoNewline
+
+        # Secure key: only current user can access
+        $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+        $acl = Get-Acl "id_ecdsa"
+        $acl.SetAccessRuleProtection($true, $false) # disable inheritance
+        $acl.Access | ForEach-Object { $acl.RemoveAccessRule($_) }
+        $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($user, "FullControl", "Allow")
+        $acl.AddAccessRule($rule)
+        Set-Acl -Path "id_ecdsa" -AclObject $acl
 
     - name: Clean Project
       run: |
