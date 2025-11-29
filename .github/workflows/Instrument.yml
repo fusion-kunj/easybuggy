@@ -5,11 +5,13 @@ on:
 
 jobs:
   instrument:
-    runs-on: self-hosted
+    runs-on: self-hosted   # macOS/Linux runner
 
     defaults:
       run:
+        shell: bash
         working-directory: ${{ github.workspace }}/target
+
     env:
       FusionLiteServerHost: ${{ vars.FUSIONLITE_SERVER_HOST }}
       FusionLiteServerPort: ${{ vars.FUSIONLITE_SERVER_PORT }}
@@ -23,61 +25,81 @@ jobs:
       InstrumentedFile: ${{ github.event.repository.name }}.jar
 
     steps:
+
     - name: Print environment variables
       run: |
-        echo "FusionLiteServerHost: ${{ env.FusionLiteServerHost }}"
-        echo "FusionLiteServerPort: ${{ env.FusionLiteServerPort }}"
-        echo "FusionLiteServerUser: ${{ env.FusionLiteServerUser }}"
-        echo "FusionLiteServerKeyFile: ${{ env.FusionLiteServerKeyFile }}"
-        echo "FusionLiteProject: ${{ env.FusionLiteProject }}"
-        echo "ApplicationFile: ${{ env.ApplicationFile }}"
-        echo "ApplicationInclude: ${{ env.ApplicationInclude }}"
-        echo "ApplicationExclude: ${{ env.ApplicationExclude }}"
-        echo "InstrumentedFolder: ${{ env.InstrumentedFolder }}"
-        echo "InstrumentedFile: ${{ env.InstrumentedFile }}"
-      
+        echo "FusionLiteServerHost: $FusionLiteServerHost"
+        echo "FusionLiteServerPort: $FusionLiteServerPort"
+        echo "FusionLiteServerUser: $FusionLiteServerUser"
+        echo "FusionLiteServerKeyFile: $FusionLiteServerKeyFile"
+        echo "FusionLiteProject: $FusionLiteProject"
+        echo "ApplicationFile: $ApplicationFile"
+        echo "ApplicationInclude: $ApplicationInclude"
+        echo "ApplicationExclude: $ApplicationExclude"
+        echo "InstrumentedFolder: $InstrumentedFolder"
+        echo "InstrumentedFile: $InstrumentedFile"
+
     - name: Print current working directory
       run: pwd
-      
+
     - name: Clean Project
       run: |
-          cmdtext="Clean:$FusionLiteProject"
-          echo "Cmd : $cmdtext"
-          ssh -i id_ecdsa -p "${{ env.FusionLiteServerPort }}" "${{ env.FusionLiteServerUser }}@${{ env.FusionLiteServerHost }}" $cmdtext
-          echo "Clean Project Done"
+        cmdtext="Clean:$FusionLiteProject"
+        echo "Cmd: $cmdtext"
+        ssh -i "$FusionLiteServerKeyFile" -p "$FusionLiteServerPort" \
+           "$FusionLiteServerUser@$FusionLiteServerHost" "$cmdtext"
+        echo "Clean Project Done"
 
-    - name: Transmitting Project Files
+    - name: Upload Project JAR to Server (SFTP PUT)
       run: |
-          echo "cd $env:FusionLiteProject/Input`nput $env:ApplicationFile`nexit" | Out-File -FilePath "sftp_put.txt" -Encoding ASCII
+        cat <<EOF > sftp_put.txt
+cd ${FusionLiteProject}/Input
+put ${ApplicationFile}
+exit
+EOF
 
-          sftp -b sftp_put.txt -i $env:FusionLiteServerKeyFile -P $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost
-          
-    - name: Preprocessing Project
+        sftp -b sftp_put.txt \
+             -i "$FusionLiteServerKeyFile" \
+             -P "$FusionLiteServerPort" \
+             "$FusionLiteServerUser@$FusionLiteServerHost"
+
+    - name: Preprocess Project
       run: |
-          $cmdtext = "PreProcess" + ":" + $env:FusionLiteProject
-          echo "Cmd : $cmdtext"
-          ssh -i $env:FusionLiteServerKeyFile -p $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost $cmdtext
+        cmdtext="PreProcess:$FusionLiteProject"
+        echo "Cmd: $cmdtext"
+        ssh -i "$FusionLiteServerKeyFile" -p "$FusionLiteServerPort" \
+           "$FusionLiteServerUser@$FusionLiteServerHost" "$cmdtext"
 
     - name: Instrument Project
       run: |
-          $cmdtext = "Instrument" + ":" + $env:FusionLiteProject
-          echo "Cmd : $cmdtext"
-          ssh -i $env:FusionLiteServerKeyFile -p $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost $cmdtext
+        cmdtext="Instrument:$FusionLiteProject"
+        echo "Cmd: $cmdtext"
+        ssh -i "$FusionLiteServerKeyFile" -p "$FusionLiteServerPort" \
+           "$FusionLiteServerUser@$FusionLiteServerHost" "$cmdtext"
 
     - name: PostProcess Project
       run: |
-          $cmdtext = "PostProcess" + ":" + $env:FusionLiteProject
-          echo "Cmd : $cmdtext"
-          ssh -i $env:FusionLiteServerKeyFile -p $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost $cmdtext
+        cmdtext="PostProcess:$FusionLiteProject"
+        echo "Cmd: $cmdtext"
+        ssh -i "$FusionLiteServerKeyFile" -p "$FusionLiteServerPort" \
+           "$FusionLiteServerUser@$FusionLiteServerHost" "$cmdtext"
 
-    - name: Transmitting Project Files
+    - name: Download Instrumented JAR (SFTP GET)
       run: |
-          if (Test-Path -Path $env:InstrumentedFolder) {
-            Remove-Item -Path $env:InstrumentedFolder -Recurse -Force
-            New-Item -ItemType Directory -Path $env:InstrumentedFolder
-          } else {
-            New-Item -ItemType Directory -Path $env:InstrumentedFolder
-          }
-          echo "lcd $env:InstrumentedFolder`ncd $env:FusionLiteProject/Output`nget $env:InstrumentedFile`nexit" | Out-File -FilePath "sftp_get.txt" -Encoding ASCII
+        # Clean & create instrumented folder
+        rm -rf "$InstrumentedFolder"
+        mkdir -p "$InstrumentedFolder"
 
-          sftp -b sftp_get.txt -i $env:FusionLiteServerKeyFile -P $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost
+        # Create SFTP batch file
+        cat <<EOF > sftp_get.txt
+lcd ${InstrumentedFolder}
+cd ${FusionLiteProject}/Output
+get ${InstrumentedFile}
+exit
+EOF
+
+        # Execute SFTP
+        sftp -b sftp_get.txt \
+             -i "$FusionLiteServerKeyFile" \
+             -P "$FusionLiteServerPort" \
+             "$FusionLiteServerUser@$FusionLiteServerHost"
