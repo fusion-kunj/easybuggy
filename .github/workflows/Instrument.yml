@@ -43,7 +43,7 @@ jobs:
       run: |
           $cmdtext = "Clean" + ":" + $env:FusionLiteProject
           echo "Cmd : $cmdtext"
-          ssh -i $env:FusionLiteServerKeyFile -p $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost $cmdtext
+          ssh -i id_ecdsa -p $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost $cmdtext
           echo "Clean Project Done"
 
     - name: Transmitting Project Files
