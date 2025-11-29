@@ -40,9 +40,8 @@ jobs:
       run: pwd
       
     - name: Clean Project
-      shell: pwsh
       run: |
-          $cmdtext = "Clean" + ":" + $env:FusionLiteProject
+          cmdtext="Clean:$FusionLiteProject"
           echo "Cmd : $cmdtext"
           ssh -i id_ecdsa -p $env:FusionLiteServerPort $env:FusionLiteServerUser@$env:FusionLiteServerHost $cmdtext
           echo "Clean Project Done"
