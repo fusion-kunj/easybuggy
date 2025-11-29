@@ -40,6 +40,7 @@ jobs:
       run: pwd
       
     - name: Clean Project
+      shell: pwsh
       run: |
           $cmdtext = "Clean" + ":" + $env:FusionLiteProject
           echo "Cmd : $cmdtext"
