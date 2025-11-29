@@ -58,13 +58,13 @@ jobs:
     - name: Upload Project JAR to Server (SFTP PUT)
       run: |
         @"
-cd $($env:FusionLiteProject)/Input
-put $($env:ApplicationFile)
-exit
-"@ | Set-Content -Path "sftp_put.txt"
+        cd $($env:FusionLiteProject)/Input
+        put $($env:ApplicationFile)
+        exit
+        "@ | Set-Content -Path "sftp_put.txt"
 
         sftp -b sftp_put.txt `
-             -i id_ecdsa `
+            -i id_ecdsa `
              -P $env:FusionLiteServerPort `
              "$env:FusionLiteServerUser@$env:FusionLiteServerHost"
 
@@ -99,11 +99,11 @@ exit
 
         # Create SFTP batch
         @"
-lcd $($env:InstrumentedFolder)
-cd $($env:FusionLiteProject)/Output
-get $($env:InstrumentedFile)
-exit
-"@ | Set-Content -Path "sftp_get.txt"
+        lcd $($env:InstrumentedFolder)
+        cd $($env:FusionLiteProject)/Output
+        get $($env:InstrumentedFile)
+        exit
+        "@ | Set-Content -Path "sftp_get.txt"
 
         sftp -b sftp_get.txt `
              -i id_ecdsa `
