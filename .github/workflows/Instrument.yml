@@ -52,7 +52,7 @@ jobs:
       run: |
         cmdtext="Clean:$FusionLiteProject"
         echo "Cmd: $cmdtext"
-        ssh -i "$FusionLiteServerKeyFile" -p "$FusionLiteServerPort" \
+        ssh -i id_ecdsa -p "$FusionLiteServerPort" \
            "$FusionLiteServerUser@$FusionLiteServerHost" "$cmdtext"
         echo "Clean Project Done"
 
@@ -65,7 +65,7 @@ jobs:
         EOF
 
         sftp -b sftp_put.txt \
-             -i "$FusionLiteServerKeyFile" \
+             -i id_ecdsa \
              -P "$FusionLiteServerPort" \
              "$FusionLiteServerUser@$FusionLiteServerHost"
 
@@ -73,21 +73,21 @@ jobs:
       run: |
         cmdtext="PreProcess:$FusionLiteProject"
         echo "Cmd: $cmdtext"
-        ssh -i "$FusionLiteServerKeyFile" -p "$FusionLiteServerPort" \
+        ssh -i id_ecdsa -p "$FusionLiteServerPort" \
            "$FusionLiteServerUser@$FusionLiteServerHost" "$cmdtext"
 
     - name: Instrument Project
       run: |
         cmdtext="Instrument:$FusionLiteProject"
         echo "Cmd: $cmdtext"
-        ssh -i "$FusionLiteServerKeyFile" -p "$FusionLiteServerPort" \
+        ssh -i id_ecdsa -p "$FusionLiteServerPort" \
            "$FusionLiteServerUser@$FusionLiteServerHost" "$cmdtext"
 
     - name: PostProcess Project
       run: |
         cmdtext="PostProcess:$FusionLiteProject"
         echo "Cmd: $cmdtext"
-        ssh -i "$FusionLiteServerKeyFile" -p "$FusionLiteServerPort" \
+        ssh -i id_ecdsa -p "$FusionLiteServerPort" \
            "$FusionLiteServerUser@$FusionLiteServerHost" "$cmdtext"
 
     - name: Download Instrumented JAR (SFTP GET)
@@ -106,6 +106,6 @@ jobs:
 
         # Execute SFTP
         sftp -b sftp_get.txt \
-             -i "$FusionLiteServerKeyFile" \
+             -i id_ecdsa \
              -P "$FusionLiteServerPort" \
              "$FusionLiteServerUser@$FusionLiteServerHost"
