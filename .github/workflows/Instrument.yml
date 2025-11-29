@@ -41,7 +41,13 @@ jobs:
 
     - name: Print current working directory
       run: pwd
-
+    
+    - name: Create SSH key file
+      run: |
+        echo "$FusionLiteServerKeyFile" > id_ecdsa
+        chmod 600 id_ecdsa
+      shell: bash
+      
     - name: Clean Project
       run: |
         cmdtext="Clean:$FusionLiteProject"
