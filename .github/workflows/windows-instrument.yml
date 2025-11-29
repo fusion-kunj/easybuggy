@@ -1,0 +1,111 @@
+name: Instrument
+
+on:
+  workflow_dispatch:
+
+jobs:
+  instrument:
+    runs-on: self-hosted   # Windows self-hosted runner
+
+    defaults:
+      run:
+        shell: powershell
+        working-directory: ${{ github.workspace }}\target
+
+    env:
+      FusionLiteServerHost: ${{ vars.FUSIONLITE_SERVER_HOST }}
+      FusionLiteServerPort: ${{ vars.FUSIONLITE_SERVER_PORT }}
+      FusionLiteServerUser: ${{ secrets.FUSIONLITE_SERVER_USER }}
+      FusionLiteServerKeyFile: ${{ secrets.FUSIONLITE_SERVER_KEY_FILE }}
+      FusionLiteProject: ${{ github.event.repository.name }}
+      ApplicationFile: ${{ github.event.repository.name }}.jar
+      ApplicationInclude: ""
+      ApplicationExclude: ""
+      InstrumentedFolder: Instrumented
+      InstrumentedFile: ${{ github.event.repository.name }}.jar
+
+    steps:
+
+    - name: Print environment variables
+      run: |
+        Write-Host "FusionLiteServerHost: $env:FusionLiteServerHost"
+        Write-Host "FusionLiteServerPort: $env:FusionLiteServerPort"
+        Write-Host "FusionLiteServerUser: $env:FusionLiteServerUser"
+        Write-Host "FusionLiteServerKeyFile: (hidden)"
+        Write-Host "FusionLiteProject: $env:FusionLiteProject"
+        Write-Host "ApplicationFile: $env:ApplicationFile"
+        Write-Host "InstrumentedFolder: $env:InstrumentedFolder"
+        Write-Host "InstrumentedFile: $env:InstrumentedFile"
+
+    - name: Print current working directory
+      run: |
+        Get-Location
+
+    - name: Create SSH key file
+      run: |
+        Set-Content -Path "id_ecdsa" -Value $env:FusionLiteServerKeyFile
+        # No chmod on Windows but must ensure correct line endings
+        wsl dos2unix id_ecdsa 2>$null
+
+    - name: Clean Project
+      run: |
+        $cmdtext = "Clean:$env:FusionLiteProject"
+        Write-Host "Cmd: $cmdtext"
+        ssh -i id_ecdsa -p $env:FusionLiteServerPort `
+            "$env:FusionLiteServerUser@$env:FusionLiteServerHost" "$cmdtext"
+        Write-Host "Clean Project Done"
+
+    - name: Upload Project JAR to Server (SFTP PUT)
+      run: |
+        @"
+cd $($env:FusionLiteProject)/Input
+put $($env:ApplicationFile)
+exit
+"@ | Set-Content -Path "sftp_put.txt"
+
+        sftp -b sftp_put.txt `
+             -i id_ecdsa `
+             -P $env:FusionLiteServerPort `
+             "$env:FusionLiteServerUser@$env:FusionLiteServerHost"
+
+    - name: Preprocess Project
+      run: |
+        $cmdtext = "PreProcess:$env:FusionLiteProject"
+        Write-Host "Cmd: $cmdtext"
+        ssh -i id_ecdsa -p $env:FusionLiteServerPort `
+            "$env:FusionLiteServerUser@$env:FusionLiteServerHost" "$cmdtext"
+
+    - name: Instrument Project
+      run: |
+        $cmdtext = "Instrument:$env:FusionLiteProject"
+        Write-Host "Cmd: $cmdtext"
+        ssh -i id_ecdsa -p $env:FusionLiteServerPort `
+            "$env:FusionLiteServerUser@$env:FusionLiteServerHost" "$cmdtext"
+
+    - name: PostProcess Project
+      run: |
+        $cmdtext = "PostProcess:$env:FusionLiteProject"
+        Write-Host "Cmd: $cmdtext"
+        ssh -i id_ecdsa -p $env:FusionLiteServerPort `
+            "$env:FusionLiteServerUser@$env:FusionLiteServerHost" "$cmdtext"
+
+    - name: Download Instrumented JAR (SFTP GET)
+      run: |
+        # Remove folder if exists
+        if (Test-Path $env:InstrumentedFolder) {
+            Remove-Item -Recurse -Force $env:InstrumentedFolder
+        }
+        New-Item -ItemType Directory -Path $env:InstrumentedFolder | Out-Null
+
+        # Create SFTP batch
+        @"
+lcd $($env:InstrumentedFolder)
+cd $($env:FusionLiteProject)/Output
+get $($env:InstrumentedFile)
+exit
+"@ | Set-Content -Path "sftp_get.txt"
+
+        sftp -b sftp_get.txt `
+             -i id_ecdsa `
+             -P $env:FusionLiteServerPort `
+             "$env:FusionLiteServerUser@$env:FusionLiteServerHost"
