@@ -53,10 +53,10 @@ jobs:
     - name: Upload Project JAR to Server (SFTP PUT)
       run: |
         cat <<EOF > sftp_put.txt
-cd ${FusionLiteProject}/Input
-put ${ApplicationFile}
-exit
-EOF
+        cd ${FusionLiteProject}/Input
+        put ${ApplicationFile}
+        exit
+        EOF
 
         sftp -b sftp_put.txt \
              -i "$FusionLiteServerKeyFile" \
@@ -92,11 +92,11 @@ EOF
 
         # Create SFTP batch file
         cat <<EOF > sftp_get.txt
-lcd ${InstrumentedFolder}
-cd ${FusionLiteProject}/Output
-get ${InstrumentedFile}
-exit
-EOF
+        lcd ${InstrumentedFolder}
+        cd ${FusionLiteProject}/Output
+        get ${InstrumentedFile}
+        exit
+        EOF
 
         # Execute SFTP
         sftp -b sftp_get.txt \
