@@ -36,7 +36,7 @@ jobs:
     # Install Maven on Linux
     - name: Install Maven on Linux
       if: runner.os == 'Linux'
-      run: sudo apt-get update && sudo apt-get install -y maven
+      run: apt-get update && sudo apt-get install -y maven
 
     # Build the project with Maven
     - name: Build with Maven
