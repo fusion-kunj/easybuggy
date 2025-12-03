@@ -1,24 +1,21 @@
 name: EasyBuggy Build and Test
-
 on:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: self-hosted
-
     steps:
     # Checkout the code
     - name: Checkout code
       uses: actions/checkout@v3
-
+    
     # Set up JDK 11
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
         java-version: 11
         distribution: 'temurin'
-
+    
     # Cache Maven dependencies
     - name: Cache Maven dependencies
       uses: actions/cache@v3
@@ -27,15 +24,29 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-
-    # Build the project with Maven
+    
+    # Build the project with Maven (without starting server)
     - name: Build with Maven
-      run: mvn clean install
-
-    # (Optional) Run integration tests or curl checks
+      run: mvn clean package -DskipTests
+    
+    # Start Tomcat in background
+    - name: Start Tomcat server
+      run: |
+        mvn tomcat7:run &
+        echo $! > tomcat.pid
+        sleep 30
+    
+    # Test server
     - name: Test server
-      run: curl http://localhost:8080/
-
-    # Stop embedded Tomcat
+      run: |
+        curl -f http://localhost:8080/ || exit 1
+    
+    # Stop Tomcat
     - name: Stop Tomcat
-      run: mvn tomcat7:shutdown
+      if: always()
+      run: |
+        if [ -f tomcat.pid ]; then
+          kill $(cat tomcat.pid) || true
+        fi
+        # Alternative: use Maven shutdown
+        mvn tomcat7:shutdown || true
