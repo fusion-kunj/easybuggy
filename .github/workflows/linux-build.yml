@@ -32,14 +32,10 @@ jobs:
     - name: Build with Maven
       run: mvn clean install
 
-    # Run Jetty in the background
-    - name: Run Jetty in background
-      run: nohup mvn jetty:run &
+    # (Optional) Run integration tests or curl checks
+    - name: Test server
+      run: curl http://localhost:8080/
 
-    # Wait some time for server to start (adjust as needed)
-    - name: Wait for server to start
-      run: sleep 30
-
-    # Stop Jetty server
-    - name: Stop Jetty
-      run: mvn jetty:stop
+    # Stop embedded Tomcat
+    - name: Stop Tomcat
+      run: mvn tomcat7:shutdown
