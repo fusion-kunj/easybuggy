@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 jobs:
   build:
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     steps:
     # Checkout the code
     - name: Checkout code
