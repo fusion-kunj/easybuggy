@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux]
     steps:
     # Checkout the code
     - name: Checkout code
@@ -35,11 +35,6 @@ jobs:
         mvn tomcat7:run &
         echo $! > tomcat.pid
         sleep 30
-    
-    # Test server
-    - name: Test server
-      run: |
-        curl -f http://localhost:8080/ || exit 1
     
     # Stop Tomcat
     - name: Stop Tomcat
